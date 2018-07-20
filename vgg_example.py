@@ -91,6 +91,7 @@ def classify_img_vgg(input_img_path):
 
 def classify_img_vgg2(input_img_path):
     sess = tf.Session()
+
     # model = VGG16()
     # vgg_json = model.to_json()
     # del model
@@ -98,27 +99,44 @@ def classify_img_vgg2(input_img_path):
     # with open('vgg_keras_model.json', 'w') as out:
     #     out.write(sj.dumps(sj.loads(vgg_json), indent=4))
     # model = model_from_json(vgg_json)
+
+    # input_shape = _obtain_input_shape(None,
+    #                                   default_size=224,
+    #                                   min_size=48,
+    #                                   data_format=K.image_data_format())
+
     model = Sequential()
-    model.add(InputLayer(input_shape=(224, 224, 3), name='input'))
+
+    model.add(InputLayer((224, 224, 3), name='input'))
+
     model.add(Conv2D(64, (3, 3), padding='same', activation='relu', name='conv1_1'))
     model.add(Conv2D(64, (3, 3), padding='same', activation='relu', name='conv1_2'))
     model.add(MaxPooling2D((2, 2), strides=(2, 2), name='pool1'))
+
     model.add(Conv2D(128, (3, 3), padding='same', activation='relu', name='conv2_1'))
     model.add(Conv2D(128, (3, 3), padding='same', activation='relu', name='conv2_2'))
     model.add(MaxPooling2D((2, 2), strides=(2, 2), name='pool2'))
+
     model.add(Conv2D(256, (3, 3), padding='same', activation='relu', name='conv3_1'))
     model.add(Conv2D(256, (3, 3), padding='same', activation='relu', name='conv3_2'))
     model.add(Conv2D(256, (3, 3), padding='same', activation='relu', name='conv3_3'))
     model.add(MaxPooling2D((2, 2), strides=(2, 2), name='pool3'))
+
     model.add(Conv2D(512, (3, 3), padding='same', activation='relu', name='conv4_1'))
     model.add(Conv2D(512, (3, 3), padding='same', activation='relu', name='conv4_2'))
     model.add(Conv2D(512, (3, 3), padding='same', activation='relu', name='conv4_3'))
     model.add(MaxPooling2D((2, 2), strides=(2, 2), name='pool4'))
-    model.add(Flatten())
+
+    model.add(Conv2D(512, (3, 3), padding='same', activation='relu', name='conv5_1'))
+    model.add(Conv2D(512, (3, 3), padding='same', activation='relu', name='conv5_2'))
+    model.add(Conv2D(512, (3, 3), padding='same', activation='relu', name='conv5_3'))
+    model.add(MaxPooling2D((2, 2), strides=(2, 2), name='pool5'))
+
+    model.add(Flatten(name='flatten'))
     model.add(Dense(4096, name='fc_1'))
     model.add(Dense(4096, name='fc_2'))
     model.add(Dense(1000, activation='softmax', name='softmax'))
-    model.compile('sgd', 'categorical_crossentropy')
+    model.load_weights('vgg16_weights_tf_dim_ordering_tf_kernels.h5')
 
     print(model.summary())
     # plot_model(model, to_file='vgg.png')
@@ -148,7 +166,7 @@ def classify_img_vgg2(input_img_path):
     print('%s (%.2f%%)' % (label[1], label[2]*100))
 
 def main():
-    classify_img_vgg2('dog.jpg')
+    classify_img_vgg2('mug.jpg')
 
 if __name__ == '__main__':
     main()
